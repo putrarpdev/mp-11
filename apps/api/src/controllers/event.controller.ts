@@ -16,21 +16,21 @@ export class EventController {
         const user = await client.events.create({
           data: {
             title,
-            organizer_id,
-            date,
+            organizer_id: Number(organizer_id),
+            date: new Date(date),
             description,
             price,
-            category_id,
-            location_id,
-            available_seats
+            category_id: Number(category_id),
+            location_id: Number(location_id),
+            available_seats: Number(available_seats)
           },
         });
 
-        await client.user_roles.create({
-          data: {
-            user_id: user.id
-          }
-        })
+        // await client.user_roles.create({
+        //   data: {
+        //     user_id: user.id
+        //   }
+        // })
 
         return user;
       })
@@ -79,9 +79,8 @@ export class EventController {
     next: NextFunction
   ) => {
     try {
-      const { title } = req.event as Event;
 
-      const event = await eventAction.findEventByTitle(String(title));
+      const event = await eventAction.findEventByTitle(req);
 
       if (!event) throw new Error("Event not found!");
 

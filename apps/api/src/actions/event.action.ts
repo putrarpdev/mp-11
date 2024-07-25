@@ -1,4 +1,5 @@
 import prisma from "@/prisma";
+import { Request } from "express";
 
 class EventAction {
     public async createEvent(
@@ -31,18 +32,42 @@ class EventAction {
         }
     }
 
-    public async findEventByTitle(title: string) {
+    public async findEventByTitle(req: Request) {
         try {
-            const user = await prisma.events.findMany({
-                where: {
-                    title,
-                },
+            const {
+              title,
+              category_id,
+              location_id,
+              ticket_type,
+              page,
+              pageSize,
+            } = req.query;
+      
+            console.log(req.query);
+      
+            let filter = {};
+      
+            if (title) filter = { ...filter, title: title };
+            if (category_id) filter = { ...filter, category_id: Number(category_id) };
+            if (location_id) filter = { ...filter, location_id: Number(location_id) };
+            if (ticket_type) filter = { ...filter, ticket_type: ticket_type };
+      
+            const events = await prisma.events.findMany({
+              skip: (Number(page) - 1) * Number(pageSize),
+              take: Number(pageSize),
+              where: {
+                AND: [
+                  {
+                    ...filter,
+                  },
+                ],
+              },
             });
-
-            return user;
-        } catch (err) {
+      
+            return events;
+          } catch (err) {
             throw err;
-        }
+          }
     }
 
     public async findEventByCategory(category_id: number) {

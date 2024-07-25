@@ -59,28 +59,42 @@ export class UserController {
             firstname,
             lastname,
             password_hash,
-            referral_number: referralCode
+            referral_number: referralCode,
+            points_balance: 0
           },
         });
 
         if (referral_number) {
           const referredByUser = await client.users.findUnique({
             where: {
-              referral_number: referralCode,
+              referral_number,
             },
           });
-
+          
           if (referredByUser) {
-            const points = 5000;
+            newUser.referred_by = Number(referredByUser.id)
+            const points = 10000;
             const expiresAt = new Date();
             expiresAt.setMonth(expiresAt.getMonth() + 3);
 
             await client.referrals.create({
               data: {
                 user_id: referredByUser.id,
-                referred_user_id: newUser.id,
+                referred_user_id: referredByUser.id,
                 points,
                 expires_at: expiresAt,
+              },
+            });
+
+            await client.users.update({
+              where: {
+                id: newUser.id,
+              },
+              data: {
+                // points_balance: {
+                //   increment: referredByUser.points_balance! + 10000
+                // },
+                referred_by: referredByUser.id,
               },
             });
 
@@ -90,8 +104,9 @@ export class UserController {
               },
               data: {
                 points_balance: {
-                  increment: 1,
+                  increment: 10000
                 },
+                
               },
             });
 
