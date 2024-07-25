@@ -1,68 +1,48 @@
 import express, {
-  json,
-  urlencoded,
-  Express,
+  Application,
   Request,
   Response,
-  NextFunction,
-  Router,
-} from 'express';
-import cors from 'cors';
-import { PORT } from './config';
-import { SampleRouter } from './routers/sample.router';
+  NextFunction
+} from "express"
+import { IRoutes } from "./interfaces/route.interfaces"
 
-export default class App {
-  private app: Express;
 
-  constructor() {
+export class App {
+  public app: Application;
+  public port: number;
+
+  constructor(routes: IRoutes[]) {
     this.app = express();
-    this.configure();
-    this.routes();
-    this.handleError();
+    this.port = 8000;
+
+    this.initializeMiddlewares();
+    this.initializeRoutes(routes);
+    this.initializeErrorMiddlewares();
   }
 
-  private configure(): void {
-    this.app.use(cors());
-    this.app.use(json());
-    this.app.use(urlencoded({ extended: true }));
+  private initializeMiddlewares() {
+    this.app.use(express.json());
   }
 
-  private handleError(): void {
-    // not found
-    this.app.use((req: Request, res: Response, next: NextFunction) => {
-      if (req.path.includes('/api/')) {
-        res.status(404).send('Not found !');
-      } else {
-        next();
-      }
+  private initializeRoutes(routes: IRoutes[]) {
+    routes.forEach((route) => {
+      this.app.use("/api", route.router);
     });
+  }
 
-    // error
+  private initializeErrorMiddlewares() {
     this.app.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {
-        if (req.path.includes('/api/')) {
-          console.error('Error : ', err.stack);
-          res.status(500).send('Error !');
-        } else {
-          next();
-        }
-      },
+        console.log(err.message);
+        res.status(500).send(err.message);
+      }
     );
   }
 
-  private routes(): void {
-    const sampleRouter = new SampleRouter();
 
-    this.app.get('/api', (req: Request, res: Response) => {
-      res.send(`Hello, Purwadhika Student API!`);
-    });
-
-    this.app.use('/api/samples', sampleRouter.getRouter());
-  }
-
-  public start(): void {
-    this.app.listen(PORT, () => {
-      console.log(`  ➜  [API] Local:   http://localhost:${PORT}/`);
+  public listen() {
+    this.app.listen(this.port, () => {
+      console.log(`Server started on port ${this.port}`);
     });
   }
 }

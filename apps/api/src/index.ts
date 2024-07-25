@@ -1,10 +1,9 @@
-import App from './app';
+import { App } from './app';
+import { EventRouter } from './routers/event.router';
+import { UserRouter } from './routers/user.router';
+import { DashboardRouter } from './routers/dashboard.route';
 
-const main = () => {
-  // init db here
+const app = new App([ new UserRouter(), new EventRouter(), new DashboardRouter() ]);
 
-  const app = new App();
-  app.start();
-};
 
-main();
+app.listen();

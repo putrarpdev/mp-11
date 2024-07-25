@@ -1,21 +1,228 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:root@localhost:3306/mini_project" //env("DATABASE_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model discount_coupons {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int
+  discount_percentage Int       @default(10)
+  expires_at          DateTime  @db.Date
+  is_expired          Boolean   @default(false)
+  created_at          DateTime? @default(now()) @db.Timestamp(0)
+  updated_at          DateTime? @default(now()) @db.Timestamp(0)
+  users               users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "discount_coupons_ibfk_1")
 
-  @@map("samples") // if you want to use snake_case format
+  @@index([user_id], map: "user_id")
+}
+
+model event_categories {
+  id     Int      @id @default(autoincrement())
+  name   String   @unique(map: "name") @db.VarChar(100)
+  events events[]
+}
+
+model event_locations {
+  id            Int       @id @default(autoincrement())
+  location_name String    @unique(map: "location_name") @db.VarChar(255)
+  address       String?   @db.Text
+  city          String?   @db.VarChar(100)
+  state         String?   @db.VarChar(100)
+  country       String?   @db.VarChar(100)
+  postal_code   String?   @db.VarChar(20)
+  is_deleted    Boolean   @default(false)
+  created_at    DateTime? @default(now()) @db.Timestamp(0)
+  updated_at    DateTime? @default(now()) @db.Timestamp(0)
+  events        events[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model event_reviews {
+  id         Int       @id @default(autoincrement())
+  event_id   Int
+  user_id    Int
+  rating     Int
+  review     String?   @db.Text
+  is_deleted Boolean   @default(false)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @default(now()) @db.Timestamp(0)
+  events     events    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_reviews_ibfk_1")
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_reviews_ibfk_2")
+
+  @@index([event_id], map: "event_id")
+  @@index([user_id], map: "user_id")
+}
+
+model event_statistics {
+  id                 Int       @id @default(autoincrement())
+  event_id           Int
+  total_tickets_sold Int
+  total_revenue      Decimal   @db.Decimal(10, 2)
+  created_at         DateTime? @default(now()) @db.Timestamp(0)
+  events             events    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_statistics_ibfk_1")
+
+  @@index([event_id], map: "event_id")
+}
+
+model event_transactions {
+  id               Int         @id @default(autoincrement())
+  event_id         Int
+  user_id          Int
+  transaction_date DateTime?   @default(now()) @db.Timestamp(0)
+  promotion_id     Int?
+  amount           Decimal     @db.Decimal(10, 2)
+  is_deleted       Boolean     @default(false)
+  created_at       DateTime?   @default(now()) @db.Timestamp(0)
+  updated_at       DateTime?   @default(now()) @db.Timestamp(0)
+  events           events      @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_transactions_ibfk_1")
+  users            users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_transactions_ibfk_2")
+  promotions       promotions? @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "event_transactions_ibfk_3")
+
+  @@index([event_id], map: "event_id")
+  @@index([promotion_id], map: "promotion_id")
+  @@index([user_id], map: "user_id")
+}
+
+model events {
+  id                 Int                  @id @default(autoincrement())
+  organizer_id       Int
+  title              String               @db.VarChar(255)
+  description        String?              @db.Text
+  date               DateTime             @db.Date
+  price              Decimal              @db.Decimal(10, 2)
+  category_id        Int?
+  location_id        Int?
+  available_seats    Int
+  ticket_type        events_ticket_type   @default(paid)
+  is_deleted         Boolean              @default(false)
+  created_at         DateTime?            @default(now()) @db.Timestamp(0)
+  updated_at         DateTime?            @default(now()) @db.Timestamp(0)
+  event_reviews      event_reviews[]
+  event_statistics   event_statistics[]
+  event_transactions event_transactions[]
+  users              users                @relation(fields: [organizer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "events_ibfk_1")
+  event_categories   event_categories?    @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "events_ibfk_2")
+  event_locations    event_locations?     @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "events_ibfk_3")
+  promotions         promotions[]
+  tickets            tickets[]
+
+  @@index([category_id], map: "idx_event_category")
+  @@index([location_id], map: "idx_event_location")
+  @@index([title], map: "idx_event_title")
+  @@index([organizer_id], map: "organizer_id")
+}
+
+model points_redemption {
+  id              Int       @id @default(autoincrement())
+  user_id         Int
+  points_redeemed Int
+  created_at      DateTime? @default(now()) @db.Timestamp(0)
+  users           users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "points_redemption_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model promotions {
+  id                  Int                  @id @default(autoincrement())
+  event_id            Int
+  discount_percentage Int
+  max_uses            Int
+  used_count          Int?                 @default(0)
+  start_date          DateTime?            @db.Date
+  end_date            DateTime?            @db.Date
+  uses_referral       Boolean              @default(false)
+  uses_event_date     Boolean              @default(false)
+  is_deleted          Boolean              @default(false)
+  created_at          DateTime?            @default(now()) @db.Timestamp(0)
+  updated_at          DateTime?            @default(now()) @db.Timestamp(0)
+  event_transactions  event_transactions[]
+  events              events               @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "promotions_ibfk_1")
+
+  @@index([event_id], map: "event_id")
+}
+
+model referrals {
+  id                                      Int       @id @default(autoincrement())
+  user_id                                 Int
+  referred_user_id                        Int
+  points                                  Int       @default(10000)
+  expires_at                              DateTime  @db.Date
+  is_expired                              Boolean   @default(false)
+  created_at                              DateTime? @default(now()) @db.Timestamp(0)
+  updated_at                              DateTime? @default(now()) @db.Timestamp(0)
+  users_referrals_user_idTousers          users     @relation("referrals_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "referrals_ibfk_1")
+  users_referrals_referred_user_idTousers users     @relation("referrals_referred_user_idTousers", fields: [referred_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "referrals_ibfk_2")
+
+  @@index([referred_user_id], map: "referred_user_id")
+  @@index([user_id], map: "user_id")
+}
+
+model roles {
+  id         Int          @id @default(autoincrement())
+  role_name  String       @unique(map: "role_name") @db.VarChar(50)
+  user_roles user_roles[]
+}
+
+model tickets {
+  id          Int       @id @default(autoincrement())
+  event_id    Int
+  user_id     Int
+  price       Decimal   @db.Decimal(10, 2)
+  discount    Decimal?  @default(0.00) @db.Decimal(10, 2)
+  final_price Decimal   @db.Decimal(10, 2)
+  is_deleted  Boolean   @default(false)
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @default(now()) @db.Timestamp(0)
+  events      events    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tickets_ibfk_1")
+  users       users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tickets_ibfk_2")
+
+  @@index([event_id], map: "event_id")
+  @@index([user_id], map: "user_id")
+}
+
+model user_roles {
+  user_id Int
+  role_id Int   @default(2)
+  users   users @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_roles_ibfk_1")
+  roles   roles @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_roles_ibfk_2")
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "role_id")
+}
+
+model users {
+  id                                          Int                  @id @default(autoincrement())
+  username                                    String               @unique(map: "username") @db.VarChar(50)
+  firstname                                   String?
+  lastname                                    String?
+  email                                       String               @unique(map: "email") @db.VarChar(100)
+  password_hash                               String               @db.VarChar(255)
+  referral_number                             String?              @unique(map: "referral_number") @db.VarChar(50)
+  referred_by                                 Int?
+  points_balance                              Int?                 @default(0)
+  is_deleted                                  Boolean              @default(false)
+  created_at                                  DateTime?            @default(now()) @db.Timestamp(0)
+  updated_at                                  DateTime?            @default(now()) @db.Timestamp(0)
+  discount_coupons                            discount_coupons[]
+  event_reviews                               event_reviews[]
+  event_transactions                          event_transactions[]
+  events                                      events[]
+  points_redemption                           points_redemption[]
+  referrals_referrals_user_idTousers          referrals[]          @relation("referrals_user_idTousers")
+  referrals_referrals_referred_user_idTousers referrals[]          @relation("referrals_referred_user_idTousers")
+  tickets                                     tickets[]
+  user_roles                                  user_roles[]
+  users                                       users?               @relation("usersTousers", fields: [referred_by], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "users_ibfk_1")
+  other_users                                 users[]              @relation("usersTousers")
+
+  @@index([referred_by], map: "referred_by")
+}
+
+enum events_ticket_type {
+  free
+  paid
 }
