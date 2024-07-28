@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @layer base {
+  * {
+    @apply m-0;
+    @apply p-0;
+  }
+}
+
+.icon-size {
+  width: 24px;
+  height: 24px;
+} */
