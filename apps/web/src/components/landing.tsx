@@ -1,5 +1,10 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from 'react';
+
+const DashboardData = () => {
+    const [data, setData] = useState()
+}
 
 const data = [
   {
@@ -45,6 +50,25 @@ import { BsTicketPerforated } from "react-icons/bs";
 import PieComponent from './pieComponent';
 
 const Landing = () => {
+    const [attendees, setAttendees] = useState()
+    const [ticketAnnual, setTicketAnnnual] = useState()
+    const [ticketMonthly, setTicketMonthly] = useState()
+    const [event, setEvent] = useState()
+    
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await fetch('http://localhost:8000/api/dashboardData')
+
+            const data = await response.json()
+            setAttendees(data.attendees)
+            setTicketAnnnual(data.ticketYearly)
+            setTicketMonthly(data.ticketMonthly)
+            setEvent(data.event)
+            
+        }
+        console.log("useEffect")
+        fetchData();
+    }, []);
     return (
         <div className="pt-[25px] px-[25px] bg-[#F8F9FC]">
             <div className="flex items-center justify-between">
@@ -55,28 +79,28 @@ const Landing = () => {
                 <div className="h-[100px] rounded-[8px] bg-white border-l-[4px] border-[#4E73DF] flex items-center justify-between px-[30px] cursor-pointer hover:shadow-lg transform hover:scale-[103%] transition duration-300 ease-out">
                     <div>
                         <h2 className="text-[#B589DF] text-[11px] leading-[17px] font-bold">ATTENDEES</h2>
-                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">500</h2>
+                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">{attendees}</h2>
                     </div>
                     <FaUsers fontSize={28} color="" />
                 </div>
                 <div className="h-[100px] rounded-[8px] bg-white border-l-[4px] border-[#72e4a2] flex items-center justify-between px-[30px] cursor-pointer hover:shadow-lg transform hover:scale-[103%] transition duration-300 ease-out">
                     <div>
                         <h2 className="text-[#53866e] text-[11px] leading-[17px] font-bold">TICKET SOLD(ANNUAL)</h2>
-                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">500</h2>
+                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">{ticketAnnual}</h2>
                     </div>
                     <BsTicketPerforated fontSize={28} color="" />
                 </div>
                 <div className="h-[100px] rounded-[8px] bg-white border-l-[4px] border-[#e270af] flex items-center justify-between px-[30px] cursor-pointer hover:shadow-lg transform hover:scale-[103%] transition duration-300 ease-out">
                     <div>
                         <h2 className="text-[#B589DF] text-[11px] leading-[17px] font-bold">TICKET SOLD(MONTHLY)</h2>
-                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">150</h2>
+                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">{ticketMonthly}</h2>
                     </div>
                     <BsTicketPerforated fontSize={28} color="" />
                 </div>
                 <div className="h-[100px] rounded-[8px] bg-white border-l-[4px] border-[#e9e064] flex items-center justify-between px-[30px] cursor-pointer hover:shadow-lg transform hover:scale-[103%] transition duration-300 ease-out">
                     <div>
                         <h2 className="text-[#B589DF] text-[11px] leading-[17px] font-bold">EVENTS</h2>
-                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">10</h2>
+                        <h2 className="text-[20px] leading-[24px] font-bold text-[#5a5c69] mt-[5px]">{event}</h2>
                     </div>
                     <FaRegCalendarCheck fontSize={28} color="" />
                 </div>

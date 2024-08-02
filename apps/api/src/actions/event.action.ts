@@ -39,8 +39,8 @@ class EventAction {
               category_id,
               location_id,
               ticket_type,
-              page,
-              pageSize,
+            //   page,
+            //   pageSize,
             } = req.query;
       
             console.log(req.query);
@@ -53,8 +53,8 @@ class EventAction {
             if (ticket_type) filter = { ...filter, ticket_type: ticket_type };
       
             const events = await prisma.events.findMany({
-              skip: (Number(page) - 1) * Number(pageSize),
-              take: Number(pageSize),
+            //   skip: (Number(page) - 1) * Number(pageSize),
+            //   take: Number(pageSize),
               where: {
                 AND: [
                   {

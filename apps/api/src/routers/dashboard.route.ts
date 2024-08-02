@@ -15,5 +15,7 @@ export class DashboardRouter implements IRoutes {
         this.router.get('/registrations/:eventId', this.dashboard.getEventRegistrations);
         this.router.get('transactions/:eventId', this.dashboard.getEventTransactions);
         this.router.get('statistics/:eventId', this.dashboard.getEventStatistics);
+        this.router.get('/dashboardData', this.dashboard.getDashboardData);
+        // this.router.get('/dashboardData', this.dashboard.getEventCategoryCount);
     }
 }

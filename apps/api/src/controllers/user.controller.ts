@@ -11,9 +11,9 @@ export class UserController {
     next: NextFunction
   ) => {
     try {
-      const { email, password_hash } = req.body;
+      const { username, password_hash } = req.body;
 
-      const user = await authAction.login(email, password_hash);
+      const user = await authAction.login(username, password_hash);
 
       res.status(200).json({
         message: "Login Success",
@@ -120,12 +120,12 @@ export class UserController {
           }
         }
 
-        await client.user_roles.create({
-          data: {
-            user_id: newUser.id,
-            role_id: 2,
-          }
-        })
+        // await client.user_roles.create({
+        //   data: {
+        //     user_id: newUser.id,
+        //     role_id: 2,
+        //   }
+        // })
         return newUser;
         });
 
@@ -154,7 +154,7 @@ export class UserController {
       if (firstname) filter = { ...filter, firstname };
       if (lastname) filter = { ...filter, lastname };
 
-      const user = await prisma.users.findFirst({
+      const user = await prisma.users.findMany({
         where: {
           ...filter,
         }
@@ -196,12 +196,12 @@ export class UserController {
     next: NextFunction
   ) => {
     try {
-      const { userId } = req.params;
+      const { userId } = req.params;  
       const { firstname, lastname } = req.body;
 
-      const check = await authAction.findUserById(Number(userId));
+      // const check = await authAction.findUserById(Number(userId));
 
-      if (!check) throw new Error("User not found!");
+      // if (!check) throw new Error("User not found!");
 
       let params = {};
 
@@ -233,6 +233,7 @@ export class UserController {
   ) => {
     try {
       const { userId } = req.params;
+      // const numericUserId = Number(userId)
       const user = await prisma.users.delete({
         where: {
           id: Number(userId),

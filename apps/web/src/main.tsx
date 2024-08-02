@@ -6,6 +6,7 @@ import Router from './router/route.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    {/* <App /> */}
     <Router />
   </React.StrictMode>,
 )

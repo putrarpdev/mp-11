@@ -5,5 +5,4 @@ import { DashboardRouter } from './routers/dashboard.route';
 
 const app = new App([ new UserRouter(), new EventRouter(), new DashboardRouter() ]);
 
-
 app.listen();

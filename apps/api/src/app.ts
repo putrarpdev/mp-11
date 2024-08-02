@@ -5,7 +5,7 @@ import express, {
   NextFunction
 } from "express"
 import { IRoutes } from "./interfaces/route.interfaces"
-
+import cors from 'cors';
 
 export class App {
   public app: Application;
@@ -13,6 +13,7 @@ export class App {
 
   constructor(routes: IRoutes[]) {
     this.app = express();
+    this.app.use(cors())
     this.port = 8000;
 
     this.initializeMiddlewares();
@@ -38,7 +39,6 @@ export class App {
       }
     );
   }
-
 
   public listen() {
     this.app.listen(this.port, () => {

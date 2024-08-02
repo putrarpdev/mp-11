@@ -1,17 +1,22 @@
 import React from 'react'
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, } from 'recharts';
+import { useState, useEffect } from 'react';
+
+const DashboardData = () => {
+  const [data, setData] = useState()
+}
 
 const data = [
-    { name: 'Seminar', value: 400 },
-    { name: 'Talkshow', value: 300 },
-    { name: 'Konser', value: 300 },
+    { name: 'Seminar', value: 10},
+    { name: 'Talkshow', value: 10 },
+    { name: 'Konser', value: 10 },
     // { name: 'Group D', value: 200 },
   ];
   
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28',];
   
   const RADIAN = Math.PI / 180;
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, }) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -24,6 +29,18 @@ const data = [
   };
 
 const PieComponent = () => {
+  const [eventCategory, setEventCategory] = useState()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('http://localhost:8000/api/dashboardData')
+
+      const data = await response.json()
+      setEventCategory(data.eventCategory)
+    }
+    fetchData();
+  }, []);
+
   return (
     <div>
       <PieChart width={400} height={400}>

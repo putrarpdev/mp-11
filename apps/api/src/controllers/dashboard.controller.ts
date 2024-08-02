@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "@/prisma";
+import dashboardAction from "@/actions/dashboard.action";
 
 export class DashboardController {
     public getOrganizerEvents = async (
@@ -84,4 +85,42 @@ export class DashboardController {
             next(err);
         }
     }
+
+    public getDashboardData = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const data = await dashboardAction.getDashboardData()
+        // const event = await dashboardAction.getEventCategoryCounts()
+
+        try {
+            if (!data) {
+                res.status(404).json({ message: 'Dashboard data not found' });       
+            }
+
+            res.json(data);
+        } catch (err) {
+            next(err)
+        }
+    }
+
+    // public getEventCategoryCount = async (
+    //     req: Request,
+    //     res: Response,
+    //     next: NextFunction
+    // ) => {
+    //     const data = await dashboardAction.getEventCategoryCounts()
+
+    //     try {
+    //         if (!data) {
+    //             res.status(404).json({ message: 'Event Category not found' })
+    //             return
+    //         }
+
+    //         res.json(data)
+    //     } catch (err) {
+    //         next (err);
+    //     }
+    // }
 }
